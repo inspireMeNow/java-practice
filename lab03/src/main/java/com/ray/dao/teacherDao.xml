@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ray.dao.teacherDao">
+    <select id="findTechById" resultType="com.ray.pojo.teacher">
+        select * from teacher where id = #{id};
+    </select>
+    <select id="findAllTech" resultType="com.ray.pojo.teacher">
+        select * from teacher;
+    </select>
+    <select id="findCourseById" resultType="com.ray.pojo.course">
+        select * from course where teacher_id in(select id from teacher where id = #{id});
+    </select>
+    <update id="updateTechById">
+        update teacher set name = #{name}, department = #{department}, salary = #{salary}, sex = #{sex}
+        where id = #{id}
+    </update>
+    <insert id="insertTech">
+        insert into teacher values(#{id},#{name},#{department},#{salary},#{sex})
+    </insert>
+    <delete id="deleteTechById">
+        delete from teacher where id = #{id}
+    </delete>
+</mapper>

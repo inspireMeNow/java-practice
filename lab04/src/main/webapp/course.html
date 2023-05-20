@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+    .el-header {
+        background-color: rgb(238, 241, 246);
+        color: #333;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        color: #333;
+    }
+</style>
+
+<body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://unpkg.com/vue-router@3/dist/vue-router.js"></script> -->
+    <div id="app" style="height: 100%">
+        <el-container style="height: 100%; border: 1px solid #eee">
+            <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                <el-menu :default-openeds="['1','2','3','4']" @select="handleSelect">
+                    <el-submenu index="1">
+                        <template slot="title"><i class="el-icon-message"></i>用户管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="1-1">登录信息</el-menu-item>
+                        </el-menu-item-group>
+                        <el-menu-item @select="handleSelect" index="1-2">登录日志</el-menu-item>
+                        </el-menu-item-group>
+                        <!-- <el-submenu index="1-4">
+            <template slot="title">选项4</template>
+            <el-menu-item index="1-4-1">选项4-1</el-menu-item>
+          </el-submenu> -->
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title"><i class="el-icon-menu"></i>学生管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="2-1">学生信息</el-menu-item>
+                            <el-menu-item @select="handleSelect" index="2-2">选课管理</el-menu-item>
+                            <el-menu-item @select="handleSelect" index="2-3">成绩管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title"><i class="el-icon-setting"></i>教师管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="3-1">教师信息</el-menu-item>
+                            <el-menu-item @select="handleSelect" index="3-2">授课信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="4">
+                        <template slot="title"><i class="el-icon-setting"></i>课程管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="4-1">课程信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+
+            <el-container>
+                <el-header style="text-align: right; font-size: 12px">
+                    <el-input @keyup.native.enter="handleEnter" v-model="input" placeholder="请输入课程号"
+                        style="width: 150px;margin-left: auto;"></el-input>
+                    <el-dropdown style="margin-right: auto;">
+                        <i class="el-icon-setting"></i>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click.native="insertDialogVisible = true;">新增</el-dropdown-item>
+                            <el-dropdown-item @click.native="
+                                if( currentRow == null ) {
+                                    $message({
+                                        message: '请先选择一行数据',
+                                        type: 'warning'
+                                    });
+                                }
+                                else{
+                                    updateDialogVisible = true;
+                                    formLabelAlign.id = currentRow.id;
+                                    formLabelAlign.name = currentRow.name;
+                                    formLabelAlign.semester = currentRow.semester;
+                                    formLabelAlign.credit = currentRow.credit;
+                                    formLabelAlign.teacher_id = currentRow.teacher_id;
+                                }
+                                ">修改</el-dropdown-item>
+                            <el-dropdown-item @click.native="confirmDialogVisible = true">删除</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </el-header>
+
+                <el-main>
+                    <el-table ref="table" @row-click="handleRowClick" :row-style="rowStyle" :data="tableData">
+                        <el-table-column v-for="column in columns" :key="column.prop" :prop="column.prop"
+                            :label="column.label">
+                        </el-table-column>
+                    </el-table>
+                </el-main>
+            </el-container>
+        </el-container>
+
+        <el-dialog title="课程信息" :visible.sync="insertDialogVisible" width="30%" :before-close="handleClose">
+            <span></span>
+            <span slot="footer" class="dialog-footer">
+                <div style="margin: 20px;"></div>
+                <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+                    <el-form-item label="课程号">
+                        <el-input v-model="formLabelAlign.id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名">
+                        <el-input v-model="formLabelAlign.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学分">
+                        <el-input v-model="formLabelAlign.credit"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学期">
+                        <el-input v-model="formLabelAlign.semester"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师工号">
+                        <el-input v-model="formLabelAlign.teacher_id"></el-input>
+                    </el-form-item>
+                </el-form>
+                <el-button @click="insertDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="insertCourse">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="课程信息" :visible.sync="updateDialogVisible" width="30%" :before-close="handleClose">
+            <span></span>
+            <span slot="footer" class="dialog-footer">
+                <div style="margin: 20px;"></div>
+                <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+                    <el-form-item label="课程号">
+                        <el-input v-model="formLabelAlign.id" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名">
+                        <el-input v-model="formLabelAlign.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学分">
+                        <el-input v-model="formLabelAlign.credit"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学期">
+                        <el-input v-model="formLabelAlign.semester"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师工号">
+                        <el-input v-model="formLabelAlign.teacher_id"></el-input>
+                    </el-form-item>
+                </el-form>
+                <el-button @click="updateDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="updateCourseById">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="提示" :visible.sync="confirmDialogVisible" width="30%" :before-close="handleClose">
+            <span>你确定要删除吗</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="confirmDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="deleteCourseById">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</body>
+<script>
+    var Main = {
+        mounted() {
+            this.findAllCourse();
+        },
+        data() {
+            return {
+                input: '',
+                updateDialogVisible: false,
+                insertDialogVisible: false,
+                confirmDialogVisible: false,
+                labelPosition: 'right',
+                currentRow: null,
+                formLabelAlign:
+                {
+                    id: '',
+                    name: '',
+                    semester: '',
+                    credit: '',
+                    teacher_id: ''
+                },
+                courseData: [],
+                tableData: [],
+                columns: [],
+                courseColumns: [
+                    {
+                        prop: 'id',
+                        label: '课程号'
+                    },
+                    {
+                        prop: 'name',
+                        label: '课程名'
+                    },
+                    {
+                        prop: 'semester',
+                        label: '学期'
+                    },
+                    {
+                        prop: 'credit',
+                        label: '学分'
+                    },
+                    {
+                        prop: 'teacher_id',
+                        label: '教师工号'
+                    }
+                ]
+            }
+        },
+        methods: {
+            handleEnter() {
+                if (this.input == '') {
+                    this.findAllCourse();
+                }
+                else {
+                    axios({
+                        url: "/findCourseById",
+                        method: "post",
+                        data: {
+                            id: this.input
+                        },
+                        headers: {
+                            "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                        }
+                    }).then(res => {
+                        this.tableData = [res.data];
+                        this.columns = this.courseColumns;
+                        this.$nextTick(() => {
+                            this.$refs.table.doLayout();
+                        });
+                    })
+                }
+            },
+            handleRowClick(row) {
+                if (this.currentRow === row) {
+                    this.currentRow = null;
+                } else {
+                    this.currentRow = row;
+                }
+            },
+            rowStyle({ row }) {
+                if (this.currentRow === row) {
+                    return {
+                        backgroundColor: 'rgb(238, 241, 246)',
+                    };
+                }
+                return {};
+            },
+            findAllCourse() {
+                axios.get('/findAllCourse')
+                    .then(res => {
+                        this.tableData = res.data;
+                        this.columns = this.courseColumns;
+                        this.$nextTick(() => {
+                            this.$refs.table.doLayout();
+                        });
+                    })
+            },
+            handleSelect(index) {
+                switch (index) {
+                    case '2-1':
+                        window.location.href = "/student.html";
+                        break;
+                    case '3-1':
+                        window.location.href = "/teacher.html";
+                        break;
+                    case '4-1':
+                        window.location.href = "/course.html";
+                        break;
+                    default:
+                        break;
+                }
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => { });
+            },
+            insertCourse() {
+                axios({
+                    url: "/insertCourse",
+                    method: "post",
+                    data: this.formLabelAlign,
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    if (res.data == 1) {
+                        this.$message('添加成功');
+                        this.insertDialogVisible = false;
+                    }
+                    else {
+                        this.$message('添加失败');
+                        this.insertDialogVisible = false;
+                    }
+                    axios.get('/findAllCourse')
+                        .then(res => {
+                            this.courseData = res.data
+                        })
+                    this.findAllCourse();
+                })
+            },
+            updateCourseById() {
+                axios({
+                    url: "/updateCourseById",
+                    method: "post",
+                    data: this.formLabelAlign,
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    if (res.data == 1) {
+                        this.$message('修改成功');
+                        this.updateDialogVisible = false;
+                    }
+                    else {
+                        this.$message('修改失败');
+                        this.updateDialogVisible = false;
+                    }
+                    this.findAllCourse();
+                })
+            },
+            deleteCourseById() {
+                axios({
+                    url: "/deleteCourseById",
+                    method: "post",
+                    data: {
+                        id: this.currentRow.id
+                    },
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    this.confirmDialogVisible = false;
+                    if (res.data == 1) {
+                        this.$message('删除成功');
+                    }
+                    else {
+                        this.$message('删除失败');
+                    }
+                    this.findAllCourse();
+                })
+            }
+        }
+    }
+    axios.defaults.baseURL = 'http://127.0.0.1:8080/'
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>

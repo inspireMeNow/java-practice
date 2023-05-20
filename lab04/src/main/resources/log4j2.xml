@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="%5level [%t] - %msg%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
+        <logger name="org.springframework" level="INFO"></logger>
+        <logger name="org.mybatis" level="INFO"></logger>
+        <Root level="trace" >
+            <AppenderRef ref="stdout"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
