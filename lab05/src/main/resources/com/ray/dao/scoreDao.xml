@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ray.dao.scoreDao">
+    <select id="findAllScore" resultType="com.ray.pojo.score">
+        select * from score;
+    </select>
+    <select id="findScoreByStu" resultType="com.ray.pojo.score">
+        select * from course_view where student_id = #{student}
+    </select>
+    <select id="findScoreByCourse" resultType="com.ray.pojo.score">
+        select * from course_view where course_id = #{course}
+    </select>
+    <select id="findScoreByStuCourse" resultType="com.ray.pojo.score">
+        select * from score where course_id = #{course_id} and student_id = #{student_id}
+    </select>
+    <update id="updateScoreByStuCourse">
+        update score set score = #{score} where course_id = #{course_id} and student_id = #{student_id}
+    </update>
+    <insert id="insertScoreByStuCourse">
+        insert into score values(#{student_id},#{course_id},#{score})
+    </insert>
+    <delete id="deleteScoreByStuCourse">
+        delete from score where student_id = #{student_id} and course_id = #{course_id}
+    </delete>
+    <delete id="deleteScoreByStu">
+        delete from score where student_id = #{student}
+    </delete>
+    <delete id="deleteScoreByCourse">
+        delete from score where course_id = #{course}
+    </delete>
+</mapper>

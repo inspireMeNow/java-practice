@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+    .el-header {
+        background-color: rgb(238, 241, 246);
+        color: #333;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        color: #333;
+    }
+</style>
+
+<body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://unpkg.com/vue-router@3/dist/vue-router.js"></script> -->
+    <!-- <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue-router@4"></script> -->
+    <div id="app" style="height: 100%">
+        <el-container style="height: 100%; border: 1px solid #eee">
+            <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                <el-menu :default-openeds="['1','2','3','4','5']" @select="handleSelect">
+                    <el-submenu index="1">
+                        <template slot="title"><i class="el-icon-message"></i>用户管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="1-1">登录信息</el-menu-item>
+                        </el-menu-item-group>
+                        <!-- <el-submenu index="1-4">
+            <template slot="title">选项4</template>
+            <el-menu-item index="1-4-1">选项4-1</el-menu-item>
+          </el-submenu> -->
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title"><i class="el-icon-user"></i>学生管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="2-1">学生信息</el-menu-item>
+                            <el-menu-item index="2-2">选课管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title"><i class="el-icon-user-solid"></i>教师管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-1">教师信息</el-menu-item>
+                            <el-menu-item index="3-2">授课信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="4">
+                        <template slot="title"><i class="el-icon-s-flag"></i>课程管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="4-1">课程信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="5">
+                        <template slot="title"><i class="el-icon-s-cooperation"></i>成绩管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="5-1">成绩管理</el-menu-item>
+                            <!-- <el-menu-item index="5-2">成绩分析</el-menu-item> -->
+                        </el-menu-item-group>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+
+            <el-container>
+                <el-header style="text-align: right; font-size: 12px">
+                    <el-dropdown style="margin-right: 15px;">
+                        <i class="el-icon-setting"></i>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item>帐号</el-dropdown-item>
+                            <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-avatar style="position: relative; top: 10px;" src="../img/avatar.jpeg"></el-avatar>
+                </el-header>
+                <el-header style="text-align: left; font-size: 12px;background-color: #fff;">
+                    <el-input @keyup.native.enter="handleEnter" v-model="input" placeholder="请输入学号"
+                        style="margin-right:10px;width: 150px;"></el-input>
+                    <el-button type="primary" @click="insertDialogVisible = true;" plain>添加</el-button>
+                    <el-button type="warning" @click="
+                    if( currentRow == null ) {
+                        $message({
+                            message: '请先选择一行数据',
+                            type: 'warning'
+                        });
+                    }
+                    else{
+                        updateDialogVisible = true;
+                        formLabelAlign.id = currentRow.id;
+                        formLabelAlign.email = currentRow.email;
+                        formLabelAlign.password = currentRow.password;
+                        formLabelAlign.idtype = currentRow.idtype;
+                    }
+                    " plain>修改</el-button>
+                    <el-button type="danger" @click="
+                    if( currentRow == null ) {
+                        $message({
+                            message: '请先选择一行数据',
+                            type: 'warning'
+                        });
+                    }
+                    else{
+                        confirmDialogVisible = true;
+                    }
+                    " plain>删除</el-button>
+                </el-header>
+                <el-main>
+                    <el-table ref="table" @row-click="handleRowClick" :row-style="rowStyle"
+                        :data="tableData.slice((currentPage-1)*pagesize,currentPage*pagesize)">
+                        <el-table-column v-for="column in columns" :key="column.prop" :prop="column.prop"
+                            :label="column.label">
+                        </el-table-column>
+                    </el-table>
+                    <el-pagination layout="prev, pager, next" :total="total" :page-size="pagesize"
+                        @current-change="current_change">
+                    </el-pagination>
+                </el-main>
+            </el-container>
+        </el-container>
+
+        <el-dialog title="用户信息" :visible.sync="insertDialogVisible" width="30%" :before-close="handleClose"
+            :close-on-click-modal="false">
+            <span></span>
+            <span slot="footer" class="dialog-footer">
+                <div style="margin: 20px;"></div>
+                <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+                    <el-form-item label="用户id">
+                        <el-input v-model="formLabelAlign.id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱">
+                        <el-input v-model="formLabelAlign.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input type="password" v-model="formLabelAlign.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户类型">
+                        <el-select v-model="value" placeholder="请选择" style="width: 100%">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <el-button @click="clean();insertDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="insertUser">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="用户信息" :visible.sync="updateDialogVisible" width="30%" :before-close="handleClose"
+            :close-on-click-modal="false">
+            <span></span>
+            <span slot="footer" class="dialog-footer">
+                <div style="margin: 20px;"></div>
+                <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+                    <el-form-item label="用户id">
+                        <el-input v-model="formLabelAlign.id" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱">
+                        <el-input v-model="formLabelAlign.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input type="password" v-model="formLabelAlign.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户类型">
+                        <el-select v-model="value" placeholder="请选择" style="width: 100%">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <el-button @click="clean();updateDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="updateUserById">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="提示" :visible.sync="confirmDialogVisible" width="30%" :before-close="handleClose"
+            :close-on-click-modal="false">
+            <span>你确定要删除吗</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="clean();confirmDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="deleteUserById">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</body>
+<script>
+    var Main = {
+        mounted() {
+            this.findAllUser();
+        },
+        data() {
+            return {
+                options: [{
+                    value: '0',
+                    label: '学生'
+                }, {
+                    value: '1',
+                    label: '教师'
+                }],
+                value: '',
+                input: '',
+                dialogFormVisible: false,
+                updateDialogVisible: false,
+                insertDialogVisible: false,
+                confirmDialogVisible: false,
+                labelPosition: 'right',
+                currentRow: null,
+                total: 0,//总条数
+                pagesize: 15,//指定展示多少条
+                currentPage: 1,//当前页码
+                formLabelAlign:
+                {
+                    id: '',
+                    email: '',
+                    password: '',
+                    idtype: ''
+                },
+                user: 'admin',
+                tableData: [],
+                columns: [],
+                userColumns: [
+                    {
+                        prop: 'id',
+                        label: '用户id'
+                    },
+                    {
+                        prop: 'email',
+                        label: '邮箱'
+                    },
+                    {
+                        prop: 'password',
+                        label: '密码'
+                    },
+                    {
+                        prop: 'idtype',
+                        label: '用户类型'
+                    }
+                ]
+            }
+        },
+        methods: {
+            logout() {
+                window.location.href = '../index.html'
+            },
+            current_change(currentPage) {
+                this.currentPage = currentPage;
+            },
+            handleEnter() {
+                if (this.input == '') {
+                    this.findAllUser();
+                }
+                else {
+                    axios({
+                        url: "/findUserById",
+                        method: "post",
+                        data: {
+                            id: this.input
+                        },
+                        headers: {
+                            "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                        }
+                    }).then(res => {
+                        this.tableData = [res.data];
+                        this.columns = this.userColumns;
+                        // this.$nextTick(() => {
+                        //     this.$refs.table.doLayout();
+                        // });
+                    })
+                }
+            },
+            handleRowClick(row) {
+                if (this.currentRow === row) {
+                    this.currentRow = null;
+                } else {
+                    this.currentRow = row;
+                }
+            },
+            rowStyle({ row }) {
+                if (this.currentRow === row) {
+                    return {
+                        backgroundColor: 'rgb(238, 241, 246)',
+                    };
+                }
+                return {};
+            },
+            clean() {
+                this.value = '';
+                this.currentRow = null;
+                this.formLabelAlign.id = '';
+                this.formLabelAlign.email = '';
+                this.formLabelAlign.password = '';
+                this.formLabelAlign.idtype = '';
+            },
+            findAllUser() {
+                axios.get('/findAllUser')
+                    .then(res => {
+                        this.tableData = res.data;
+                        this.columns = this.userColumns;
+                        this.total = res.data.length;
+                        this.tableData.forEach(item => {
+                            if (item.idtype == 0) {
+                                item.idtype = '学生';
+                            }
+                            else if (item.idtype == 1) {
+                                item.idtype = '教师';
+                            }
+                            else {
+                                item.idtype = '管理员';
+                            }
+                            item.password = '******';
+                        })
+                        // this.$nextTick(() => {
+                        //     this.$refs.table.doLayout();
+                        // });
+                    })
+            },
+            handleSelect(index) {
+                switch (index) {
+                    case '1-1':
+                        window.location.href = "./login_index.html";
+                        break;
+                    case '2-1':
+                        window.location.href = "./student.html";
+                        break;
+                    case '2-2':
+                        window.location.href = "./student_course.html";
+                        break;
+                    case '3-1':
+                        window.location.href = "./teacher.html";
+                        break;
+                    case '3-2':
+                        window.location.href = "./teacher_course.html";
+                        break;
+                    case '4-1':
+                        window.location.href = "./course.html";
+                        break;
+                    case '5-1':
+                        window.location.href = "./score.html";
+                        break;
+                    // case '5-2':
+                    //     window.location.href = "./score_view.html";
+                    default:
+                        break;
+                }
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        this.clean();
+                        done();
+                    })
+                    .catch(_ => { });
+            },
+            insertUser() {
+                this.formLabelAlign.idtype = this.value;
+                if (this.formLabelAlign.id == '' || this.formLabelAlign.password == '' || this.formLabelAlign.email == '' || this.formLabelAlign.idtype == '') {
+                    this.$message('信息不能为空');
+                    return;
+                }
+                axios({
+                    url: "/insertUser",
+                    method: "post",
+                    data: this.formLabelAlign,
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    if (res.data == 1) {
+                        this.$message('添加成功');
+                        this.insertDialogVisible = false;
+                    }
+                    else {
+                        this.$message('添加失败');
+                        this.insertDialogVisible = false;
+                    }
+                    this.clean();
+                    this.findAllUser();
+                })
+            },
+            updateUserById() {
+                this.formLabelAlign.idtype = this.value;
+                axios({
+                    url: "/updateUserById",
+                    method: "post",
+                    data: this.formLabelAlign,
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    if (res.data == 1) {
+                        this.$message('修改成功');
+                        this.updateDialogVisible = false;
+                    }
+                    else {
+                        this.$message('修改失败');
+                        this.updateDialogVisible = false;
+                    }
+                    this.clean();
+                    this.findAllUser();
+                })
+            },
+            deleteUserById() {
+                axios({
+                    url: "/deleteUserById",
+                    method: "post",
+                    data: {
+                        id: this.currentRow.id
+                    },
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    this.confirmDialogVisible = false;
+                    if (res.data == 1) {
+                        this.$message('删除成功');
+                    }
+                    else {
+                        this.$message('删除失败');
+                    }
+                    this.clean();
+                    this.findAllUser();
+                })
+            }
+        }
+    }
+    axios.defaults.baseURL = 'http://127.0.0.1:8080/'
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>

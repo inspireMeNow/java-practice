@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ray.dao.userDao">
+    <select id="findUserById" resultType="com.ray.pojo.user">
+        select id,email,idtype from user where id = #{id};
+    </select>
+    <select id="findAllUser" resultType="com.ray.pojo.user">
+        select id,email,idtype from user;
+    </select>
+    <select id="login" resultType="com.ray.pojo.user">
+        select password from user where id = #{id};
+    </select>
+    <select id="getByToken" resultType="com.ray.pojo.user">
+        select * from user where token = #{token}
+    </select>
+    <update id="updateUserById">
+        update user set email = #{email}, password = #{password}, idtype = #{idtype}
+        where id = #{id}
+    </update>
+    <insert id="insertUser">
+        insert into user values(#{id},#{email},#{password},#{idtype},"")
+    </insert>
+    <delete id="deleteUserById">
+        delete from user where id = #{id}
+    </delete>
+</mapper>

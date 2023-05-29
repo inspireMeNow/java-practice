@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+    .el-header {
+        background-color: rgb(238, 241, 246);
+        color: #333;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        color: #333;
+    }
+</style>
+
+<body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://unpkg.com/vue-router@3/dist/vue-router.js"></script> -->
+    <!-- <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue-router@4"></script> -->
+    <div id="app" style="height: 100%">
+        <el-container style="height: 100%; border: 1px solid #eee">
+            <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                <el-menu :default-openeds="['1','2','3']" @select="handleSelect">
+                    </el-submenu>
+                    <el-submenu index="1">
+                        <template slot="title"><i class="el-icon-user"></i>学生管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="1-1">学生信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title"><i class="el-icon-s-flag"></i>课程管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="2-1">已选课程</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title"><i class="el-icon-s-cooperation"></i>成绩管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-1">成绩查看</el-menu-item>
+                            <!-- <el-menu-item index="5-2">成绩分析</el-menu-item> -->
+                        </el-menu-item-group>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+
+            <el-container>
+                <el-header style="text-align: right; font-size: 12px">
+                    <el-dropdown style="margin-right: 15px;">
+                        <i class="el-icon-setting"></i>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item>帐号</el-dropdown-item>
+                            <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-avatar style="position: relative; top: 10px;" src="../img/avatar.jpeg"></el-avatar>
+                </el-header>
+                <el-header style="text-align: left; font-size: 12px;background-color: #fff;">
+                    <el-input @keyup.native.enter="findCourseByStu" v-model="input" placeholder="请输入课程号"
+                        style="margin-right:10px;width: 150px;"></el-input>
+                </el-header>
+                <el-main>
+                    <el-table ref="table" :row-style="rowStyle"
+                        :data="courseData.slice((currentPage-1)*pagesize,currentPage*pagesize)">
+                        <el-table-column v-for="column in courseColumns" :key="column.prop" :prop="column.prop"
+                            :label="column.label">
+                        </el-table-column>
+                    </el-table>
+                    <el-pagination layout="prev, pager, next" :total="total" :page-size="pagesize"
+                        @current-change="current_change">
+                    </el-pagination>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+</body>
+<script>
+    var Main = {
+        mounted() {
+            const params = new URLSearchParams(location.search)
+            this.studentData.id = params.get('user')
+            this.findCourseByStu()
+        },
+        data() {
+            return {
+                input: '',
+                labelPosition: 'right',
+                currentRow: null,
+                total: 0,//总条数
+                pagesize: 15,//指定展示多少条
+                currentPage: 1,//当前页码
+                studentData: [
+                    {
+                        id: '',
+                        name: '',
+                        sex: '',
+                        major: '',
+                        enrollment_date: ''
+                    }
+                ],
+                courseData: [],
+                courseColumns: [
+                    {
+                        prop: 'student_id',
+                        label: '学号'
+                    },
+                    {
+                        prop: 'course_id',
+                        label: '课程号'
+                    },
+                    {
+                        prop: 'course_name',
+                        label: '课程名称'
+                    },
+                    {
+                        prop: 'semester',
+                        label: '开课学期'
+                    },
+                    {
+                        prop: 'credit',
+                        label: '学分'
+                    }
+                ]
+            }
+        },
+        methods: {
+            logout() {
+                window.location.href = '../index.html'
+            },
+            current_change(currentPage) {
+                this.currentPage = currentPage;
+            },
+            rowStyle({ row }) {
+                if (this.currentRow === row) {
+                    return {
+                        backgroundColor: 'rgb(238, 241, 246)',
+                    };
+                }
+                return {};
+            },
+            findStuById() {
+                axios({
+                    url: "/findStuById",
+                    method: "post",
+                    data: {
+                        id: this.studentData.id
+                    },
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    this.studentData = res.data;
+                }).catch(err => {
+                    console.log(err);
+                })
+            },
+            findCourseByStu() {
+                axios({
+                    url: "/findCourseByStu",
+                    method: "post",
+                    data: {
+                        student: this.studentData.id
+                    },
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                    }
+                }).then(res => {
+                    this.courseData = res.data;
+                    this.total = res.data.length;
+                    this.dialogFormVisible = true;
+                })
+            },
+            handleSelect(index) {
+                switch (index) {
+                    case '1-1':
+                        window.location.href = "./index.html?user=" + this.studentData.id;
+                        break;
+                    case '2-1':
+                        window.location.href = "./course.html?user=" + this.studentData.id;
+                        break;
+                    case '3-1':
+                        window.location.href = "./score.html?user=" + this.studentData.id;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    axios.defaults.baseURL = 'http://127.0.0.1:8080/'
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>

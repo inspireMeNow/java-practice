@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<style>
+    .el-header {
+        background-color: rgb(238, 241, 246);
+        color: #333;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        color: #333;
+    }
+</style>
+
+<body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://unpkg.com/vue-router@3/dist/vue-router.js"></script> -->
+    <!-- <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue-router@4"></script> -->
+    <div id="app" style="height: 100%">
+        <el-container style="height: 100%; border: 1px solid #eee">
+            <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                <el-menu :default-openeds="['1','2','3','4','5']" @select="handleSelect">
+                    <el-submenu index="1">
+                        <template slot="title"><i class="el-icon-message"></i>用户管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item @select="handleSelect" index="1-1">登录信息</el-menu-item>
+                        </el-menu-item-group>
+                        <!-- <el-submenu index="1-4">
+            <template slot="title">选项4</template>
+            <el-menu-item index="1-4-1">选项4-1</el-menu-item>
+          </el-submenu> -->
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title"><i class="el-icon-user"></i>学生管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="2-1">学生信息</el-menu-item>
+                            <el-menu-item index="2-2">选课管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title"><i class="el-icon-user-solid"></i>教师管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-1">教师信息</el-menu-item>
+                            <el-menu-item index="3-2">授课信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="4">
+                        <template slot="title"><i class="el-icon-s-flag"></i>课程管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="4-1">课程信息</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="5">
+                        <template slot="title"><i class="el-icon-s-cooperation"></i>成绩管理</template>
+                        <el-menu-item-group>
+                            <el-menu-item index="5-1">成绩管理</el-menu-item>
+                            <!-- <el-menu-item index="5-2">成绩分析</el-menu-item> -->
+                        </el-menu-item-group>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+
+            <el-container>
+                <el-header style="text-align: right; font-size: 12px;">
+                    <!-- <el-input v-model="input" placeholder="请输入内容" style="width: 150px;margin-left: auto;"></el-input> -->
+                    <el-dropdown>
+                        <i class="el-icon-setting" style="margin-right: 15px"></i>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item>帐号</el-dropdown-item>
+                            <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                    <el-avatar style="position: relative; top: 10px;" src="../img/avatar.jpeg"></el-avatar>
+                </el-header>
+
+                <el-main>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+</body>
+<script>
+    var Main = {
+        mounted(){
+            this.user = location.hash
+        },
+        data() {
+            return {
+                its: ['fill', 'contain', 'cover', 'none', 'scale-down'],
+                url: './img/avatar.jpeg',
+                input: '',
+                dialogVisible: false,
+                confirmDialogVisible: false,
+                labelPosition: 'right',
+                currentRow: null,
+                user: 'admin',
+                tableData: [],
+                columns: []
+            }
+        },
+        methods: {
+            logout() {
+                window.location.href = '../index.html'
+            },
+            handleSelect(index) {
+                switch (index) {
+                    case '1-1':
+                        window.location.href = "./login_index.html";
+                        break;
+                    case '2-1':
+                        window.location.href = "./student.html";
+                        break;
+                    case '2-2':
+                        window.location.href = "./student_course.html";
+                        break;
+                    case '3-1':
+                        window.location.href = "./teacher.html";
+                        break;
+                    case '3-2':
+                        window.location.href = "./teacher_course.html";
+                        break;
+                    case '4-1':
+                        window.location.href = "./course.html";
+                        break;
+                    case '5-1':
+                        window.location.href = "./score.html";
+                        break;
+                    // case '5-2':
+                    //     window.location.href = "./score_view.html";
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    axios.defaults.baseURL = 'http://127.0.0.1:8080/'
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+
+</html>
