@@ -14,71 +14,82 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin
-@Controller
-public class studentController {
-    @Autowired
-    private studentServiceImpl studentServiceImpl;
 
-    public void setStudentServiceImpl(studentServiceImpl studentServiceImpl) {
-        this.studentServiceImpl = studentServiceImpl;
-    }
-
-    @RequestMapping("/findAllStu")
+public class studentController extends baseController {
+    //    @Override
+//    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+//    {
+//
+//        // 实例化UserService
+//        studentService studentService = new studentServiceImpl();
+//
+//        // 调用相应方法获得用户pojo
+//        List<student> allUser = studentService.findAllStu();
+//
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//        response.getWriter().write(JSON.toJSONString(allUser));
+//        // 设置request属性
+////        req.setAttribute("allstudent", allUser);
+//
+//        // 转发request和response
+////        req.getRequestDispatcher("/index.jsp").forward(req,resp);
+//    }
+//
+//    @Override
+//    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+//    {
+//        doGet(req, resp);
+//    }
     protected void findAllStu(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<student> allUser = studentServiceImpl.findAllStu();
+        studentService studentService = new studentServiceImpl();
+        List<student> allUser = studentService.findAllStu();
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.getWriter().write(JSON.toJSONString(allUser));
     }
 
-    @RequestMapping("/insertStu")
     protected void insertStu(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        studentService studentService = new studentServiceImpl();
         String id = req.getParameter("id");
         String name = req.getParameter("name");
         String sex = req.getParameter("sex");
         String major = req.getParameter("major");
         String enrollment_date = req.getParameter("enrollment_date");
         student student = new student(id, name, major, enrollment_date, sex);
-        int isSuccess = studentServiceImpl.insertStu(student);
+        int isSuccess = studentService.insertStu(student);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.getWriter().write(JSON.toJSONString(isSuccess));
     }
 
-    @RequestMapping("/deleteStuById")
     protected void deleteStuById(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        studentService studentService = new studentServiceImpl();
         String id = req.getParameter("id");
-        int isSuccess = studentServiceImpl.deleteStuById(id);
+        int isSuccess = studentService.deleteStuById(id);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.getWriter().write(JSON.toJSONString(isSuccess));
     }
-
-    @RequestMapping("/updateStuById")
     protected void updateStuById(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        studentService studentService = new studentServiceImpl();
         String id = req.getParameter("id");
         String name = req.getParameter("name");
         String sex = req.getParameter("sex");
         String major = req.getParameter("major");
         String enrollment_date = req.getParameter("enrollment_date");
         student student = new student(id, name, major, enrollment_date, sex);
-        int isSuccess = studentServiceImpl.updateStuById(student);
+        int isSuccess = studentService.updateStuById(student);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.getWriter().write(JSON.toJSONString(isSuccess));
     }
 
-    @RequestMapping("findStuById")
     protected void findStuById(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        studentService studentService = new studentServiceImpl();
         String id = req.getParameter("id");
-        student student = studentServiceImpl.findStuById(id);
+        student student = studentService.findStuById(id);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resp.getWriter().write(JSON.toJSONString(student));

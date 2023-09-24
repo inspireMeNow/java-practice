@@ -5,10 +5,9 @@ import com.ray.pojo.course;
 import java.util.List;
 
 public interface courseDao {
-    public List<course> findAllCourse();
-    public course findCourseById(String id);
-    public int updateCourseById(course course);
-    public int deleteCourseById(String id);
-    public int insertCourse(course course);
-    public int deleteCourseByTech(String id);
+    public abstract List<course> findAllCourse();
+    public abstract course findCourseById(String id);
+    public abstract int updateCourseById(course course);
+    public abstract int deleteCourseById(String id);
+    public abstract int insertCourse(course course);
 }

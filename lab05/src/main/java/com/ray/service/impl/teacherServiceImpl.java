@@ -1,71 +1,78 @@
 package com.ray.service.impl;
 
-import com.ray.dao.courseDao;
-import com.ray.dao.teacherDao;
 import com.ray.pojo.course;
 import com.ray.pojo.teacher;
-
+import com.ray.dao.teacherDao;
 import com.ray.service.teacherService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.ray.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
 
-
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-@Service
 public class teacherServiceImpl implements teacherService {
-    @Autowired
-    teacherDao teacherDao;
-    @Autowired
-    courseDao courseDao;
-
-    @Override
     public List<teacher> findAllTech() {
-        return teacherDao.findAllTech();
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            return mapper.findAllTech();
+        }
     }
-
-    @Override
 
     public teacher findTechById(String id) {
-        return teacherDao.findTechById(id);
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            return mapper.findTechById(id);
+        }
     }
 
-    @Override
     public int updateTechById(teacher teacher) {
-        if (teacherDao.findTechById(teacher.getId()) == null) {
-            return -1;
-        }
-        return teacherDao.updateTechById(teacher);
-    }
-
-    @Override
-    public int deleteTechById(String id) {
-        if (teacherDao.findTechById(id) == null) {
-            return -1;
-        }
-        if(teacherDao.deleteTechById(id) == 1){
-            List<course> courseList = courseDao.findCourseByTech(id);
-            for (course course : courseList) {
-                course.setTeacher_id(id + "(已离职)");
-                courseDao.updateCourseById(course);
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            if (mapper.findTechById(teacher.getId()) == null) {
+                return -1;
             }
-            return 1;
+            int isSuccess = mapper.updateTechById(teacher);
+            sqlSession.commit();
+            sqlSession.close();
+            return isSuccess;
         }
-        return -1;
     }
 
-    @Override
+    public int deleteTechById(String id) {
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            if (mapper.findTechById(id) == null) {
+                return -1;
+            }
+            int isSuccess = mapper.deleteTechById(id);
+            sqlSession.commit();
+            sqlSession.close();
+            return isSuccess;
+        }
+    }
+
     public int insertTech(teacher teacher) {
-        if (teacherDao.findTechById(teacher.getId()) == null) {
-            return teacherDao.insertTech(teacher);
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            if (mapper.findTechById(teacher.getId()) == null) {
+                int isSuccess = mapper.insertTech(teacher);
+                sqlSession.commit();
+                sqlSession.close();
+                return isSuccess;
+            }
+            return -1;
         }
-        return -1;
     }
-
-    @Override
-    public List<course> findCourseById(String id) {
-        return teacherDao.findCourseById(id);
+    public List<course> findCourseById(String id){
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            teacherDao mapper = sqlSession.getMapper(teacherDao.class);
+            return mapper.findCourseById(id);
+        }
     }
-
 }

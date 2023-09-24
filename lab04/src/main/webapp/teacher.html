@@ -222,7 +222,7 @@
                 }
                 else {
                     axios({
-                        url: "/findTechById",
+                        url: "/TeacherController?action=findTechById",
                         method: "post",
                         data: {
                             id: this.input
@@ -255,7 +255,7 @@
                 return {};
             },
             findAllTech() {
-                axios.get('/findAllTech')
+                axios.get('/TeacherController?action=findAllTech')
                     .then(res => {
                         this.tableData = res.data;
                         this.columns = this.teacherColumns;
@@ -288,7 +288,7 @@
             },
             insertTech() {
                 axios({
-                    url: "/insertTech",
+                    url: "/TeacherController?action=insertTech",
                     method: "post",
                     data: this.formLabelAlign,
                     headers: {
@@ -303,7 +303,7 @@
                         this.$message('添加失败');
                         this.insertDialogVisible = false;
                     }
-                    axios.get('/findAllTech')
+                    axios.get('/TeacherController?action=findAllTech')
                         .then(res => {
                             this.teacherData = res.data
                         })
@@ -312,7 +312,7 @@
             },
             updateTechById() {
                 axios({
-                    url: "/updateTechById",
+                    url: "/TeacherController?action=updateTechById",
                     method: "post",
                     data: this.formLabelAlign,
                     headers: {
@@ -332,7 +332,7 @@
             },
             deleteTechById() {
                 axios({
-                    url: "/deleteTechById",
+                    url: "/TeacherController?action=deleteTechById",
                     method: "post",
                     data: {
                         id: this.currentRow.id

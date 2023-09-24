@@ -1,15 +1,9 @@
 package com.ray.dao;
 
-import com.ray.pojo.score;
 import com.ray.pojo.student;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-// 如果在SpringbootApplicaton中使用了MapperScan则可以单独为每一个mapper使用@Mapper注解
-@Mapper
 public interface studentDao {
     public List<student> findAllStu();
 
@@ -25,5 +19,4 @@ public interface studentDao {
 
     public int insertStu(student student);
 
-    public List<score> findCourseByStu(String id);
 }

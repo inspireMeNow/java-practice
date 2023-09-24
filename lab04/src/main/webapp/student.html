@@ -219,7 +219,7 @@
                 }
                 else {
                     axios({
-                        url: "/findStuById",
+                        url: "/StudentController?action=findStuById",
                         method: "post",
                         data: {
                             id: this.input
@@ -252,7 +252,7 @@
                 return {};
             },
             findAllStu() {
-                axios.get('/findAllStu')
+                axios.get('/StudentController?action=findAllStu')
                     .then(res => {
                         this.tableData = res.data;
                         this.columns = this.studentColumns;
@@ -285,7 +285,7 @@
             },
             insertStu() {
                 axios({
-                    url: "/insertStu",
+                    url: "/StudentController?action=insertStu",
                     method: "post",
                     data: this.formLabelAlign,
                     headers: {
@@ -300,7 +300,7 @@
                         this.$message('添加失败');
                         this.insertDialogVisible = false;
                     }
-                    axios.get('/findAllStu')
+                    axios.get('/StudentController?action=findAllStu')
                         .then(res => {
                             this.studentData = res.data
                         })
@@ -309,7 +309,7 @@
             },
             updateStuById() {
                 axios({
-                    url: "/updateStuById",
+                    url: "/StudentController?action=updateStuById",
                     method: "post",
                     data: this.formLabelAlign,
                     headers: {
@@ -329,7 +329,7 @@
             },
             deleteStuById() {
                 axios({
-                    url: "/deleteStuById",
+                    url: "/StudentController?action=deleteStuById",
                     method: "post",
                     data: {
                         id: this.currentRow.id

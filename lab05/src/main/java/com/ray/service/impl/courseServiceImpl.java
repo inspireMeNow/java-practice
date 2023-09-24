@@ -1,74 +1,70 @@
 package com.ray.service.impl;
 
 import com.ray.dao.courseDao;
-import com.ray.dao.scoreDao;
-import com.ray.dao.teacherDao;
+import com.ray.pojo.course;
 import com.ray.pojo.course;
 import com.ray.service.courseService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.ray.utils.SqlSessionUtil;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 
-@Service
 public class courseServiceImpl implements courseService {
-    @Autowired
-    courseDao courseDao;
-    @Autowired
-    teacherDao teacherDao;
-    @Autowired
-    scoreDao scoreDao;
-
-    @Override
     public List<course> findAllCourse() {
-        return courseDao.findAllCourse();
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            courseDao mapper = sqlSession.getMapper(courseDao.class);
+            return mapper.findAllCourse();
+        }
     }
 
-    public List<course> findCourseByEnroll(String enroll) {
-        return null;
-    }
-
-    public List<course> findCourseByMajor(String major) {
-        return null;
-    }
-
-    @Override
     public course findCourseById(String id) {
-        return courseDao.findCourseById(id);
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            courseDao mapper = sqlSession.getMapper(courseDao.class);
+            return mapper.findCourseById(id);
+        }
     }
 
-    @Override
     public int updateCourseById(course course) {
-        if (courseDao.findCourseById(course.getId()) == null) {
-            return -1;
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            courseDao mapper = sqlSession.getMapper(courseDao.class);
+            if (mapper.findCourseById(course.getId()) == null) {
+                return -1;
+            }
+            int isSuccess = mapper.updateCourseById(course);
+            sqlSession.commit();
+            sqlSession.close();
+            return isSuccess;
         }
-        if (teacherDao.findTechById(course.getTeacher_id()) == null) {
-            return -1;
-        }
-        return courseDao.updateCourseById(course);
     }
 
-    @Override
     public int deleteCourseById(String id) {
-        if (courseDao.findCourseById(id) == null) {
-            return -1;
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            courseDao mapper = sqlSession.getMapper(courseDao.class);
+            if (mapper.findCourseById(id) == null) {
+                return -1;
+            }
+            int isSuccess = mapper.deleteCourseById(id);
+            sqlSession.commit();
+            sqlSession.close();
+            return isSuccess;
         }
-        scoreDao.deleteScoreByCourse(id);
-        return courseDao.deleteCourseById(id);
     }
 
-    @Override
     public int insertCourse(course course) {
-        if (courseDao.findCourseById(course.getId()) == null) {
-            if (teacherDao.findTechById(course.getTeacher_id()) != null) {
-                return courseDao.insertCourse(course);
+        try (SqlSession sqlSession = SqlSessionUtil.getSqlSession()) {
+            assert sqlSession != null;
+            courseDao mapper = sqlSession.getMapper(courseDao.class);
+            if (mapper.findCourseById(course.getId()) == null) {
+                int isSuccess = mapper.insertCourse(course);
+                sqlSession.commit();
+                sqlSession.close();
+                return isSuccess;
             }
             return -1;
         }
-        return -1;
-    }
-
-    public List<course> findCourseByTech(String teacher) {
-        return courseDao.findCourseByTech(teacher);
     }
 }

@@ -2,51 +2,50 @@ package com.ray.service.impl;
 
 import com.ray.dao.studentDao;
 import com.ray.pojo.student;
-
 import com.ray.service.studentService;
 
-
 import java.util.List;
+import com.ray.dao.impl.studentDaoImpl;
 
 public class studentServiceImpl implements studentService {
-    studentDao studentDao;
-
-    public void setStudentDao(studentDao studentDao) {
-        this.studentDao = studentDao;
-    }
-
+    @Override
     public List<student> findAllStu() {
+        studentDao studentDao = new studentDaoImpl();
         return studentDao.findAllStu();
     }
 
-    public List<student> findStuByEnroll(String enroll) {
-        return null;
-    }
-
-    public List<student> findStuByMajor(String major) {
-        return null;
-    }
-
+    @Override
     public student findStuById(String id) {
-        return studentDao.findStuById(id);
+        return new studentDaoImpl().findStuById(id);
     }
 
+    @Override
+    public List<student> findStuByEnroll(String enroll) {
+        return new studentDaoImpl().findStuByEnroll(enroll);
+    }
+
+    @Override
+    public List<student> findStuByMajor(String major) {
+        return new studentDaoImpl().findStuByMajor(major);
+    }
+
+    @Override
     public int updateStuById(student student) {
-        if (studentDao.findStuById(student.getId()) == null) {
-            return -1;
-        }
-        return studentDao.updateStuById(student);
+        return new studentDaoImpl().updateStuById(student);
     }
 
+    @Override
     public int deleteStuById(String id) {
-        if (studentDao.findStuById(id) == null) {
-            return -1;
+        studentDao studentDao = new studentDaoImpl();
+        if(studentDao.findStuById(id).getId() != null){
+            return studentDao.deleteStuById(id);
         }
-        return studentDao.deleteStuById(id);
+        return -1;
     }
 
     public int insertStu(student student) {
-        if (studentDao.findStuById(student.getId()) == null) {
+        studentDao studentDao = new studentDaoImpl();
+        if(studentDao.findStuById(student.getId()).getId() == null){
             return studentDao.insertStu(student);
         }
         return -1;
